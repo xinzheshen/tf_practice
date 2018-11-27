@@ -2,6 +2,10 @@
 import tensorflow as tf
 
 
+# 在计算机视觉中，卷积的价值体现在对输入（如图像）降维的能力上。一幅2D图像的维数包括其宽度、高度和通道数。
+# 利用卷积运算对图像降维是通过修改卷积核的strides（跨度）参数实现的
+# 两个张量的卷积会生成一幅特征图
+
 input_batch = tf.constant([
         [
           # 第一个输入（如果是一幅2D图像，它的维数包括其宽度、高度和通道数，即3维，
@@ -22,7 +26,7 @@ kernel = tf.constant([
         ]
     ])
 print('input_shape', input_batch.shape)
-# shape 同时刻画了张量的维（阶）数 以及 每一维的长度， 张量的形状可以是包含有序整数集的俩报表或元组
+# shape 同时刻画了张量的维（阶）数 以及 每一维的长度， 张量的形状可以是包含有序整数集的列表或元组
 # 列表中元素的数量与维数一致，且每个元素描述了相应维数上的长度
 # input_shape (2, 2, 2, 1)
 print('kernel_shape', kernel.shape)
@@ -38,4 +42,4 @@ print('output_shape', output.shape)
 
 kernel_shape = tf.shape(kernel)
 print('kernel_shape2', sess.run(kernel_shape))
-
+# kernel_shape2 [1 1 1 2]

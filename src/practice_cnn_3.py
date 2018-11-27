@@ -59,6 +59,14 @@ flattened_layer_two = tf.reshape(pool_layer_two,
                                  [batch_size, # image_batch中的每幅图像
                                   -1] # 输入的其他所有维
                                  )
+print('flattened_layer_two', flattened_layer_two.get_shape())
 
 # 池化层展开后，便可与将网络当前状态与所预测的狗的品种关联的两个全连接层进行整合
 
+hidden_layer_three = tf.layers.dense(flattened_layer_two, 512, activation=tf.nn.relu)
+
+# 对一些神经元进行dropout处理，削减它们在模型中的重要性
+hidden_layer_three = tf.nn.dropout(hidden_layer_three, 0.1)
+
+# 输出是前面的参与训练中可用的120个不同的狗的品种的全连接
+final_fully_connected = tf.layers.dense(hidden_layer_three, 5)
