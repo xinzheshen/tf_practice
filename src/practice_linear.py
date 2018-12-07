@@ -91,11 +91,17 @@ with tf.Session() as sess:
 
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
+    histogram = tf.summary.histogram('weights', w)
+    writer = tf.summary.FileWriter('D:\\sxz\\practice\\other\\log', sess.graph)
+    summaries = tf.summary.merge_all()
+
     # 实际训练迭代次数
     training_steps = 1000
     for step in range(training_steps):
         sess.run([train_op])
-        # 出于调试和学习的目的，查看损失在训练过程中递减的情况
+
+        train_summary = sess.run(histogram)
+        writer.add_summary(train_summary, global_step=step)
         if step % 10 == 0:
             print('loss', sess.run([total_loss]))
 
@@ -103,10 +109,8 @@ with tf.Session() as sess:
 
     coord.request_stop()
     coord.join(threads)
-
-    writer = tf.summary.FileWriter('D:\\sxz\\practice\\other\\log', sess.graph)
-    # 在对应的虚拟环境下运行 tensorboard --logdir=.\src\my_graph ，在浏览器中访问 6006端口可查看数据流图
     writer.close()
+
 
 
 
