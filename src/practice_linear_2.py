@@ -28,20 +28,18 @@ def genDate(numPoints,bias,variance):
         x[i][1] = i
         # y赋值  正太分布
         y[i] = i + np.random.normal(loc=bias, scale=variance, size=None)
-    return np.array(x,dtype='float32').reshape(numPoints,2),np.array(y,dtype='float32').reshape(numPoints,1)
+    return np.array(x, dtype='float32').reshape(numPoints, 2), np.array(y, dtype='float32').reshape(numPoints, 1)
 
 
 # 生成数据
-x_data, y_data = genDate(100,25,3)
+x_data, y_data = genDate(100, 25, 3)
 
 print(x_data.shape, y_data.shape)
 
 # print(training_x,training_y)
 
 
-fig = plt.figure(1, figsize=(8,4))
-# http://blog.csdn.net/eddy_zheng/article/details/48713449
-# ax=plt.subplot(111,projection='3d') #创建一个三维的绘图工程
+fig = plt.figure(1, figsize=(8, 4))
 ax = Axes3D(fig)
 
 # 坐标轴
@@ -49,13 +47,13 @@ ax.set_zlabel('Z')
 ax.set_ylabel('Y')
 ax.set_xlabel('X')
 
-ax.scatter(x_data[:,0],x_data[:,1],y_data,c='r',s=1)         #绘制数据点
+ax.scatter(x_data[:, 0], x_data[:, 1], y_data, c='r', s=1)
 
 
 # 构造二元线性回归模型
 b = tf.Variable(1.0)
 w = tf.Variable(tf.ones([2, 1]))
-y = tf.matmul(x_data,w) + b
+y = tf.matmul(x_data, w) + b
 
 # 设置均方差损失函数，在使用梯度下架法的时候学习率不能选择太多，不然会震荡，不会收敛
 cost = tf.reduce_mean(tf.square(y - y_data))  # 拟合效果更好
@@ -69,7 +67,7 @@ optimizer = tf.train.GradientDescentOptimizer(0.0001)   # 学习率不能选择�
 train = optimizer.minimize(cost)
 
 '''
-#开始求解
+ 开始求解
 '''
 # 初始化变量：tf的准备工作，主要声明了变量，就必须先初始化才可以使用
 init = tf.global_variables_initializer()

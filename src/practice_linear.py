@@ -4,15 +4,11 @@
 '''
 
 import tensorflow as tf
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 # 通用代码框架
-
-# 初始化变量和模型参数，定义训练闭环中的运算
-
-# 设置权值为2x1的列向量
-w = tf.Variable(tf.zeros([2, 1]), name='weights')
-b = tf.Variable(0., name='bias')
-
 
 # 计算推断模型在数据X上的输出，并将结果返回
 def inference(X):
@@ -25,7 +21,7 @@ def inference(X):
 def loss(X, Y):
     Y_predicted = inference(X)
     with tf.name_scope('loss'):
-        # 计算总平方误差，即每个预测值与期望输出只差的平方的总和
+        # 计算总平方误差，即每个预测值与期望输出之差的平方的总和
         return tf.reduce_sum(tf.squared_difference(Y, Y_predicted))
 
 
@@ -78,8 +74,28 @@ def evaluate(sess, X, Y):
         print('65kg: ', sess.run(inference([[65., 25.]])))
 
 
-with tf.Session() as sess:
-    tf.initialize_all_variables().run()
+def plot_figure(data_X, data_Y, data_Y_cal):
+    fig = plt.figure(1, figsize=(8, 4))
+    ax = Axes3D(fig)
+
+    print('data_x shape', data_X.shape)
+    print('data_Y shape', data_Y.shape)
+    print('data_Y_cal shape', data_Y_cal.shape)
+    # 坐标轴
+    ax.set_zlabel('Z')
+    ax.set_ylabel('Y')
+    ax.set_xlabel('X')
+
+    ax.scatter(data_X[:, 0], data_X[:, 1], data_Y, c='r', s=1)
+    ax.scatter(data_X[:, 0], data_X[:, 1], data_Y_cal, 'b--', s=1)
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    # 设置权值为2x1的列向量
+    w = tf.Variable(tf.zeros([2, 1]), name='weights')
+    b = tf.Variable(0., name='bias')
 
     X, Y = inputs()
 
@@ -87,29 +103,52 @@ with tf.Session() as sess:
 
     train_op = train(total_loss)
 
-    coord = tf.train.Coordinator()
-
-    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
-    histogram = tf.summary.histogram('weights', w)
-    writer = tf.summary.FileWriter('D:\\sxz\\practice\\other\\log', sess.graph)
+    scalar_loss = tf.summary.scalar('myloss', total_loss)
+    hisrogram_weights = tf.summary.histogram('myweights', w)
+    hisrogram_bias = tf.summary.histogram('mybias', b)
     summaries = tf.summary.merge_all()
 
-    # 实际训练迭代次数
-    training_steps = 1000
-    for step in range(training_steps):
-        sess.run([train_op])
+    with tf.Session() as sess:
 
-        train_summary = sess.run(histogram)
-        writer.add_summary(train_summary, global_step=step)
-        if step % 10 == 0:
-            print('loss', sess.run([total_loss]))
+        tf.initialize_all_variables().run()
 
-    evaluate(sess, X, Y)
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-    coord.request_stop()
-    coord.join(threads)
-    writer.close()
+        writer = tf.summary.FileWriter('D:\\sxz\\practice\\other\\log', sess.graph)
+
+        # 实际训练迭代次数
+        training_steps = 1000
+        for step in range(training_steps):
+            sess.run([train_op])
+
+            # weights_summary, bias_summary, loss_summary = sess.run([hisrogram_weights, hisrogram_bias, scalar_loss])
+            # writer.add_summary(weights_summary, global_step=step)
+            # writer.add_summary(bias_summary, global_step=step)
+            # writer.add_summary(loss_summary, global_step=step)
+
+            train_summary = sess.run(summaries)
+            writer.add_summary(train_summary, global_step=step)
+
+            if step % 10 == 0:
+                print('loss', sess.run([total_loss]))
+
+        weight = sess.run(w)
+        bia = sess.run(b)
+
+        evaluate(sess, X, Y)
+
+        coord.request_stop()
+        coord.join(threads)
+
+        writer.close()
+
+        #计算预测的结果
+        Y_cal = bia + weight[0]*X[:, 0] + weight[1]*X[:, 1]
+
+        plot_figure(X.eval(), Y.eval(), Y_cal.eval())
+
+
 
 
 
