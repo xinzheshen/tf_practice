@@ -15,7 +15,7 @@ e = tf.add(c, d, name='add_e')
 
 sess = tf.Session()
 output = sess.run(e)
-print(output)
+print('result e :', output)
 
 writer = tf.summary.FileWriter('./my_graph', sess.graph)
 # 在对应的虚拟环境下运行 tensorboard --logdir=.\src\my_graph ，在浏览器中访问 6006端口可查看数据流图

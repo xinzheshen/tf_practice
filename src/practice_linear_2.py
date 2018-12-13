@@ -80,9 +80,9 @@ config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
     sess.run(init)
     #迭代，重复执行最下化损失函数这一步骤
-    for step in range(100000):
+    for step in range(10000):
         sess.run(train)
-        if step % 10000 == 0:
+        if step % 1000 == 0:
             print('迭代次数{0}:W->{1},b->{2},{3}'.format(step,sess.run(w),sess.run(b),sess.run(cost)))
     #保存最后结果
     rw = sess.run(w)

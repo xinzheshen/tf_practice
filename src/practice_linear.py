@@ -5,7 +5,9 @@
 
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
 
 # 通用代码框架
@@ -38,7 +40,7 @@ def inputs():
                       [72, 36],
                       [79, 57],
                       [75, 44],
-                      [27, 24],
+                      [47, 24],
                       [89, 31],
                       [65, 52],
                       [57, 23],
@@ -53,7 +55,7 @@ def inputs():
                       [85, 37],
                       [55, 40],
                       [63, 30]]
-        blood_fat_content = [354, 190, 405, 263, 451, 302, 288, 385, 402, 365, 209, 290, 346, 254, 395,
+        blood_fat_content = [354, 190, 405, 263, 451, 302, 288, 385, 402, 365, 229, 290, 346, 254, 395,
                              434, 220, 374, 308, 220, 311, 181, 274, 303, 244]
 
         return tf.to_float(weight_age), tf.to_float(blood_fat_content)
@@ -74,21 +76,21 @@ def evaluate(sess, X, Y):
         print('65kg: ', sess.run(inference([[65., 25.]])))
 
 
-def plot_figure(data_X, data_Y, data_Y_cal):
+def plot_figure(data_x, data_y, data_z, weight, bia):
+    x_for_surface, y_for_surface = np.meshgrid(data_x, data_y)
+    data_z_predict = bia + weight[0]*x_for_surface + weight[1]*y_for_surface
+
     fig = plt.figure(1, figsize=(8, 4))
     ax = Axes3D(fig)
 
-    print('data_x shape', data_X.shape)
-    print('data_Y shape', data_Y.shape)
-    print('data_Y_cal shape', data_Y_cal.shape)
     # 坐标轴
-    ax.set_zlabel('Z')
-    ax.set_ylabel('Y')
-    ax.set_xlabel('X')
+    ax.set_zlabel('blood_fat_content')
+    ax.set_ylabel('age')
+    ax.set_xlabel('weight')
 
-    ax.scatter(data_X[:, 0], data_X[:, 1], data_Y, c='r', s=1)
-    ax.scatter(data_X[:, 0], data_X[:, 1], data_Y_cal, 'b--', s=1)
-
+    ax.scatter(data_x, data_y, data_z, c='b', s=10)
+    ax.plot_surface(x_for_surface, y_for_surface, data_z_predict, rstride=1, cstride=1,
+                    cmap=cm.jet, linewidth=0, antialiased=False)
     plt.show()
 
 
@@ -143,11 +145,12 @@ if __name__ == '__main__':
 
         writer.close()
 
-        #计算预测的结果
-        Y_cal = bia + weight[0]*X[:, 0] + weight[1]*X[:, 1]
+        # 将tensor对象转换为np数组
+        data_x = X.eval()
+        data_z = Y.eval()
 
-        plot_figure(X.eval(), Y.eval(), Y_cal.eval())
-
+    # 画图
+    plot_figure(data_x[:, 0], data_x[:, 1], data_z, weight, bia)
 
 
 
